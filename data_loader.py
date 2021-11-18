@@ -22,6 +22,9 @@ def process_image(image):
     print(f"Image shape: {img_array.shape}") if debug else None
     tf_img = tf.image.resize_with_crop_or_pad(img_array, 128, 128)
     print(F"Image tensor shape: {tf_img.shape}") if debug else None
+    out_array = tf_img.numpy
+    print(f"Output shape: {out_array.shape}") if debug else None
+
 
 #     TODO - load image.
 
