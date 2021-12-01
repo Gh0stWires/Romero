@@ -29,6 +29,12 @@ noise_dim = 100
 num_examples_to_generate = 16
 seed = tf.random.normal([num_examples_to_generate, noise_dim])
 
+# Load image data
+data = tf.keras.utils.image_dataset_from_directory(
+    '/Users/sam.grogan/Documents/Romero/processed-images/', labels=None, label_mode=None,
+    class_names=None, color_mode='grayscale', batch_size=32, image_size=(128,
+                                                                   128))
+
 
 # Notice the use of `tf.function`
 # This annotation causes the function to be "compiled".
@@ -58,6 +64,8 @@ def train(dataset, epochs):
 
         for image_batch in dataset:
             train_step(image_batch)
+            print("This is collins fault")
+            print('Time for epoch {} is {} sec'.format(epoch + 1, time.time() - start))
 
         # Produce images for the GIF as you go
         # display.clear_output(wait=True)
@@ -76,3 +84,7 @@ def train(dataset, epochs):
     generate_and_save_images(generator,
                              epochs,
                              seed)
+
+
+if __name__ == '__main__':
+    train(data, 20)
