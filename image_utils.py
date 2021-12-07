@@ -1,5 +1,7 @@
 import PIL
 from matplotlib import pyplot as plt
+import envirment_utils
+import os
 
 
 def generate_and_save_images(model, epoch, test_input):
@@ -14,10 +16,15 @@ def generate_and_save_images(model, epoch, test_input):
         plt.imshow(predictions[i, :, :, 0] * 127.5 + 127.5, cmap='gray')
         plt.axis('off')
 
-    plt.savefig('image_at_epoch_{:04d}.png'.format(epoch))
+    if not os.path.exists(envirment_utils.output_directory):
+        os.makedirs(envirment_utils.output_directory)
+    plt.savefig(get_path_for_epoch_img(epoch))
     plt.show()
 
 
 # Display a single image using the epoch number
 def display_image(epoch_no):
-    return PIL.Image.open('image_at_epoch_{:04d}.png'.format(epoch_no))
+    return PIL.Image.open(get_path_for_epoch_img(epoch_no))
+
+def get_path_for_epoch_img(epoch):
+    return envirment_utils.output_directory + 'image_at_epoch_{:04d}.png'.format(epoch)

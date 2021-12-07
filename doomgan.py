@@ -6,6 +6,7 @@ import tensorflow as tf
 from image_utils import generate_and_save_images
 from model_utils import generator_optimizer, discriminator_optimizer, discriminator_loss, generator_loss
 from models import make_generator_model, make_discriminator_model
+import envirment_utils
 
 # Constants
 BUFFER_SIZE = 60000
@@ -31,7 +32,7 @@ seed = tf.random.normal([num_examples_to_generate, noise_dim])
 
 # Load image data
 data = tf.keras.utils.image_dataset_from_directory(
-    '/Users/sam.grogan/Documents/Romero/processed-images/', labels=None, label_mode=None,
+    envirment_utils.processed_directory, labels=None, label_mode=None,
     class_names=None, color_mode='grayscale', batch_size=32, image_size=(128,
                                                                    128))
 
@@ -87,4 +88,4 @@ def train(dataset, epochs):
 
 
 if __name__ == '__main__':
-    train(data, 20)
+    train(data, 2)

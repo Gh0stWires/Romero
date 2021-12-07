@@ -3,6 +3,7 @@ import numpy as np
 import PIL
 import tensorflow as tf
 from pathlib import Path
+import envirment_utils
 
 debug = True
 
@@ -31,11 +32,12 @@ def process_image(image):
 
     im = PIL.Image.fromarray(test * 255)
     im = im.convert("L")
-    im.save(Path('/Users/sam.grogan/Documents/Romero/processed-images/' + image.name))
+    im.save(Path(get_processed_image_path(image.name)))
 
 
 
-#     TODO - load image.
+def get_processed_image_path(name):
+    return envirment_utils.processed_directory + name
 
 
 if __name__ == '__main__':
