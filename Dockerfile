@@ -13,6 +13,6 @@ COPY *.py ./
 
 # temp - remove this when it create in the image
 
-COPY /processed-images/ ./processed-images/
+#COPY /processed-images/ ./processed-images/
 
 ENTRYPOINT ["python", "doomgan.py"]
