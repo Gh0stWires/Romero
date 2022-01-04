@@ -10,7 +10,7 @@
         <option name="envVars">
           <list>
             <DockerEnvVarImpl>
-              <option name="name" value="OUTPUT_DIRECTORY" />
+              <option name="name" value="DOOM_OUTPUT_DIRECTORY" />
               <option name="value" value="/tmp/doom_output/" />
             </DockerEnvVarImpl>
             <DockerEnvVarImpl>
