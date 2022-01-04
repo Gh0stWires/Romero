@@ -1,6 +1,7 @@
 import os
 import time
 import tensorflow as tf
+import envirment_utils
 # from IPython import display
 
 from image_utils import generate_and_save_images
@@ -57,6 +58,7 @@ def train_step(images):
 
     generator_optimizer.apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
     discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, discriminator.trainable_variables))
+    print('gen loss {} disc loss {}'.format(gen_loss, disc_loss))
 
 
 def train(dataset, epochs):
@@ -65,8 +67,7 @@ def train(dataset, epochs):
 
         for image_batch in dataset:
             train_step(image_batch)
-            print("This is collins fault")
-            print('Time for epoch {} is {} sec'.format(epoch + 1, time.time() - start))
+
 
         # Produce images for the GIF as you go
         # display.clear_output(wait=True)
@@ -88,4 +89,4 @@ def train(dataset, epochs):
 
 
 if __name__ == '__main__':
-    train(data, 2)
+    train(data, int(envirment_utils.epochs))
