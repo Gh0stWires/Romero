@@ -11,22 +11,21 @@ import envirment_utils
 
 # Constants
 BUFFER_SIZE = 60000
-BATCH_SIZE = 256
+BATCH_SIZE = envirment_utils.batch_size
 
 # Models
 generator = make_generator_model()
 discriminator = make_discriminator_model()
 
 # Checkpoint info
-checkpoint_dir = './training_checkpoints'
-checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt")
+checkpoint_prefix = os.path.join(envirment_utils.checkpoint_dir, "ckpt")
 checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
                                  discriminator_optimizer=discriminator_optimizer,
                                  generator=generator,
                                  discriminator=discriminator)
 
 #  Training setup
-EPOCHS = 50
+EPOCHS = envirment_utils.epochs
 noise_dim = 100
 num_examples_to_generate = 16
 seed = tf.random.normal([num_examples_to_generate, noise_dim])
