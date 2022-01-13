@@ -6,14 +6,18 @@
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
       <env name="DOOM_OUTPUT_DIRECTORY" value="/tmp/doom_output/" />
-      <env name="PROCESSED_IMAGES" value="./processed-images/" />
-      <env name="EPOCHS" value="20000" />
+      <env name="PROCESSED_IMAGES" value="$USER_HOME$/processed_images/" />
+      <env name="EPOCHS" value="2" />
+      <env name="CHECKPOINT_DIR" value="/tmp/doom_checkpoints/" />
+      <env name="BATCH_SIZE" value="256" />
+      <env name="ADD_LABEL_NOISE" value="false" />
     </envs>
-    <option name="SDK_HOME" value="/usr/local/bin/python3.9" />
+    <option name="SDK_HOME" value="" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-    <option name="IS_MODULE_SDK" value="false" />
+    <option name="IS_MODULE_SDK" value="true" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
+    <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/doomgan.py" />
     <option name="PARAMETERS" value="" />
     <option name="SHOW_COMMAND_LINE" value="false" />
