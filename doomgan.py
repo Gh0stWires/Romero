@@ -11,7 +11,7 @@ import envirment_utils
 
 # Constants
 BUFFER_SIZE = 60000
-BATCH_SIZE = envirment_utils.batch_size
+BATCH_SIZE = int(envirment_utils.batch_size)
 
 # Models
 generator = make_generator_model()
