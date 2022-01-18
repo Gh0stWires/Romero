@@ -19,7 +19,10 @@ def generate_and_save_images(model, epoch, test_input):
     if not os.path.exists(envirment_utils.output_directory):
         os.makedirs(envirment_utils.output_directory)
     plt.savefig(get_path_for_epoch_img(epoch))
-    plt.show()
+    
+    if envirment_utils.show_plots:
+        #We don't want this happening in the Docker container
+        plt.show()
 
 
 # Display a single image using the epoch number

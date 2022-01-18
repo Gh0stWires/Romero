@@ -1,4 +1,5 @@
 import os
+from tabnanny import check
 import time
 import tensorflow as tf
 import envirment_utils
@@ -22,7 +23,11 @@ checkpoint_prefix = os.path.join(envirment_utils.checkpoint_dir, "ckpt")
 checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
                                  discriminator_optimizer=discriminator_optimizer,
                                  generator=generator,
-                                 discriminator=discriminator)
+                                 discriminator=discriminator,
+                                 )
+manager = tf.train.CheckpointManager(checkpoint, checkpoint_prefix=checkpoint_prefix, 
+checkpoint_interval=1, step_counter=tf.Variable(1))
+
 
 #  Training setup
 EPOCHS = envirment_utils.epochs
@@ -57,35 +62,29 @@ def train_step(images):
 
     generator_optimizer.apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
     discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, discriminator.trainable_variables))
-    print('gen loss {} disc loss {}'.format(gen_loss, disc_loss))
-
+    
+    print(f'\nGen loss\n {gen_loss.numpy()}') #TODO: colin may have broken this
+    print(f'\nDisc loss\n {disc_loss.numpy()}')
 
 def train(dataset, epochs):
+    checkpoint.restore(manager.latest_checkpoint) 
+    
     for epoch in range(epochs):
         start = time.time()
 
         for image_batch in dataset:
             train_step(image_batch)
 
+        # Save the model every N epochs
+        if (epoch + 1) % envirment_utils.epoch_checkpoint_interval == 0:
+            manager.save()
+            generate_and_save_images(generator,epoch + 1, seed)
 
-        # Produce images for the GIF as you go
-        # display.clear_output(wait=True)
-        generate_and_save_images(generator,
-                                 epoch + 1,
-                                 seed)
-
-        # Save the model every 15 epochs
-        if (epoch + 1) % 15 == 0:
-            checkpoint.save(file_prefix=checkpoint_prefix)
-
-        print('Time for epoch {} is {} sec'.format(epoch + 1, time.time() - start))
+        print(f'Time for epoch {epoch + 1} is {time.time() - start} sec')
 
     # Generate after the final epoch
     # display.clear_output(wait=True)
-    generate_and_save_images(generator,
-                             epochs,
-                             seed)
-
+    generate_and_save_images(generator, epochs, seed)
 
 if __name__ == '__main__':
     train(data, int(envirment_utils.epochs))
