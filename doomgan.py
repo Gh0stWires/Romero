@@ -12,7 +12,7 @@ import envirment_utils
 
 # Constants
 BUFFER_SIZE = 60000
-BATCH_SIZE = int(envirment_utils.batch_size)
+BATCH_SIZE = envirment_utils.batch_size
 
 # Models
 generator = make_generator_model()
@@ -25,9 +25,14 @@ checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
                                  generator=generator,
                                  discriminator=discriminator,
                                  )
-manager = tf.train.CheckpointManager(checkpoint, checkpoint_prefix=checkpoint_prefix, 
-checkpoint_interval=1, step_counter=tf.Variable(1))
-
+tf_step_counter = tf.Variable(1)
+manager = tf.train.CheckpointManager(
+    checkpoint,
+    directory=envirment_utils.checkpoint_dir,
+    max_to_keep=200,
+    checkpoint_interval=envirment_utils.checkpoint_interval,
+    step_counter=tf_step_counter,
+)
 
 #  Training setup
 EPOCHS = envirment_utils.epochs
@@ -38,8 +43,7 @@ seed = tf.random.normal([num_examples_to_generate, noise_dim])
 # Load image data
 data = tf.keras.utils.image_dataset_from_directory(
     envirment_utils.processed_directory, labels=None, label_mode=None,
-    class_names=None, color_mode='grayscale', batch_size=32, image_size=(128,
-                                                                   128))
+    class_names=None, color_mode='grayscale', batch_size=BATCH_SIZE, image_size=(128, 128))
 
 
 # Notice the use of `tf.function`
@@ -62,13 +66,14 @@ def train_step(images):
 
     generator_optimizer.apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
     discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, discriminator.trainable_variables))
-    
-    print(f'\nGen loss\n {gen_loss.numpy()}') #TODO: colin may have broken this
-    print(f'\nDisc loss\n {disc_loss.numpy()}')
+
+    tf.print("\nGen loss:", gen_loss)
+    tf.print("Disc loss:", disc_loss)
+
 
 def train(dataset, epochs):
-    checkpoint.restore(manager.latest_checkpoint) 
-    
+    checkpoint.restore(manager.latest_checkpoint)
+
     for epoch in range(epochs):
         start = time.time()
 
@@ -76,15 +81,18 @@ def train(dataset, epochs):
             train_step(image_batch)
 
         # Save the model every N epochs
-        if (epoch + 1) % envirment_utils.epoch_checkpoint_interval == 0:
-            manager.save()
-            generate_and_save_images(generator,epoch + 1, seed)
+        manager.save()
+
+        if (epoch + 1) % envirment_utils.image_interval == 0:
+            generate_and_save_images(generator, epoch + 1, seed)
 
         print(f'Time for epoch {epoch + 1} is {time.time() - start} sec')
+        tf_step_counter.assign_add(1)
 
     # Generate after the final epoch
     # display.clear_output(wait=True)
     generate_and_save_images(generator, epochs, seed)
+
 
 if __name__ == '__main__':
     train(data, int(envirment_utils.epochs))

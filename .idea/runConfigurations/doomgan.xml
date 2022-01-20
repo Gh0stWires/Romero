@@ -7,10 +7,13 @@
       <env name="PYTHONUNBUFFERED" value="1" />
       <env name="DOOM_OUTPUT_DIRECTORY" value="/tmp/doom_output/" />
       <env name="PROCESSED_IMAGES" value="$USER_HOME$/processed_images/" />
-      <env name="EPOCHS" value="2" />
+      <env name="EPOCHS" value="7" />
       <env name="CHECKPOINT_DIR" value="/tmp/doom_checkpoints/" />
       <env name="BATCH_SIZE" value="256" />
       <env name="ADD_LABEL_NOISE" value="false" />
+      <env name="CHECKPOINT_INTERVAL" value="3" />
+      <env name="SHOW_PLOTS" value="true" />
+      <env name="IMAGE_INTERVAL" value="2" />
     </envs>
     <option name="SDK_HOME" value="" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
