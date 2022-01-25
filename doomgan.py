@@ -34,6 +34,11 @@ manager = tf.train.CheckpointManager(
     step_counter=tf_step_counter,
 )
 
+# Setup Tensorboard and metrics
+train_summary_writer = tf.summary.create_file_writer(envirment_utils.tensorboard_directory)
+gen_loss_metric = tf.keras.metrics.Mean('gen_loss', dtype=tf.float32)
+disc_loss_metric = tf.keras.metrics.Mean('disc_loss', dtype=tf.float32)
+
 #  Training setup
 EPOCHS = envirment_utils.epochs
 noise_dim = 100
@@ -67,6 +72,8 @@ def train_step(images):
     generator_optimizer.apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
     discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, discriminator.trainable_variables))
 
+    gen_loss_metric(gen_loss)
+    disc_loss_metric(disc_loss)
     tf.print("\nGen loss:", gen_loss)
     tf.print("Disc loss:", disc_loss)
 
@@ -80,6 +87,10 @@ def train(dataset, epochs):
         for image_batch in dataset:
             train_step(image_batch)
 
+        with train_summary_writer.as_default():
+            tf.summary.scalar('gen_loss', gen_loss_metric.result(), step=epoch)
+            tf.summary.scalar('disc_loss', disc_loss_metric.result(), step=epoch)
+
         # Save the model every N epochs
         manager.save()
 
@@ -88,6 +99,10 @@ def train(dataset, epochs):
 
         print(f'Time for epoch {epoch + 1} is {time.time() - start} sec')
         tf_step_counter.assign_add(1)
+
+        #  Reset metrics
+        gen_loss_metric.reset_states()
+        disc_loss_metric.reset_states()
 
     # Generate after the final epoch
     # display.clear_output(wait=True)

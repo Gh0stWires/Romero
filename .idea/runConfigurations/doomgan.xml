@@ -14,6 +14,7 @@
       <env name="CHECKPOINT_INTERVAL" value="3" />
       <env name="SHOW_PLOTS" value="true" />
       <env name="IMAGE_INTERVAL" value="2" />
+      <env name="TENSORBOARD_DIR" value="/tmp/doom_tensorboard/" />
     </envs>
     <option name="SDK_HOME" value="" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
