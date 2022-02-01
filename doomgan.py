@@ -80,6 +80,10 @@ def train_step(images):
 
 def train(dataset, epochs):
     checkpoint.restore(manager.latest_checkpoint)
+    if manager.latest_checkpoint:
+        print("Checkpoints restored from {}".format(manager.latest_checkpoint))
+    else:
+        print("Training from scratch.")
 
     for epoch in range(epochs):
         start = time.time()
