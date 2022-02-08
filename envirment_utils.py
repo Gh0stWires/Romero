@@ -8,5 +8,6 @@ add_label_noise = os.environ['ADD_LABEL_NOISE'] == 'true'
 show_plots = os.environ['SHOW_PLOTS'] == 'true'
 batch_size = int(os.environ['BATCH_SIZE'])
 epochs = int(os.environ['EPOCHS'])
+max_checkpoints = int(os.environ['MAX_CHECKPOINTS'])
 checkpoint_interval = int(os.environ['CHECKPOINT_INTERVAL'])
 image_interval = int(os.environ['IMAGE_INTERVAL'])

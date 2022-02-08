@@ -15,6 +15,7 @@
       <env name="SHOW_PLOTS" value="true" />
       <env name="IMAGE_INTERVAL" value="2" />
       <env name="TENSORBOARD_DIR" value="/tmp/doom_tensorboard/" />
+      <env name="MAX_CHECKPOINTS" value="60" />
     </envs>
     <option name="SDK_HOME" value="" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />

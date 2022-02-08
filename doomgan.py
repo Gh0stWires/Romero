@@ -29,7 +29,7 @@ tf_step_counter = tf.Variable(1)
 manager = tf.train.CheckpointManager(
     checkpoint,
     directory=envirment_utils.checkpoint_dir,
-    max_to_keep=200,
+    max_to_keep=envirment_utils.max_checkpoints,
     checkpoint_interval=envirment_utils.checkpoint_interval,
     step_counter=tf_step_counter,
 )
