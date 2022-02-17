@@ -2,7 +2,6 @@ import tensorflow as tf
 from tensorflow.keras import layers
 
 
-# FIXME - update to match doom
 def make_generator_model():
     model = tf.keras.Sequential()
     model.add(layers.Dense(32 * 32 * 256, use_bias=False, input_shape=(100,)))
@@ -25,6 +24,8 @@ def make_generator_model():
     model.add(layers.Conv2DTranspose(1, (5, 5), strides=(2, 2), padding='same', use_bias=False, activation='tanh'))
     assert model.output_shape == (None, 128, 128, 1)
 
+    # TODO
+    #  https://stackoverflow.com/questions/46596636/differentiable-round-function-in-tensorflow/50434452
     return model
 
 

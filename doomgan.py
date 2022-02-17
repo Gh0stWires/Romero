@@ -60,6 +60,8 @@ def train_step(images):
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
         generated_images = generator(noise, training=True)
 
+        # generated_images = tf.math.round(generated_images)
+
         real_output = discriminator(images, training=True)
         fake_output = discriminator(generated_images, training=True)
 

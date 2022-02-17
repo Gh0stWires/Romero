@@ -9,13 +9,16 @@ def generate_and_save_images(model, epoch, test_input):
     # This is so all layers run in inference mode (batchnorm).
     predictions = model(test_input, training=False)
 
-    rnd = tf.math.round(predictions)
+    predictions = tf.math.divide(predictions, 2)
+    predictions = tf.math.add(predictions, .5)
+    predictions = tf.math.round(predictions)
 
     fig = plt.figure(figsize=(4, 4))
 
     for i in range(predictions.shape[0]):
         plt.subplot(4, 4, i + 1)
-        plt.imshow(rnd[i, :, :, 0] * 255, cmap='gray', vmin=0, vmax=255)
+        plt.imshow(predictions[i, :, :, 0] * 255, cmap='gray', vmin=0, vmax=255)
+        # plt.imshow(predictions[i, :, :, 0] * 127.5 + 127.5, cmap='gray', vmin=0, vmax=255)
         # plt.imshow(predictions[i, :, :, 0] * 127.5 + 127.5, cmap='gray')
         plt.axis('off')
 
@@ -31,6 +34,7 @@ def generate_and_save_images(model, epoch, test_input):
 # Display a single image using the epoch number
 def display_image(epoch_no):
     return PIL.Image.open(get_path_for_epoch_img(epoch_no))
+
 
 def get_path_for_epoch_img(epoch):
     return envirment_utils.output_directory + 'image_at_epoch_{:04d}.png'.format(epoch)
