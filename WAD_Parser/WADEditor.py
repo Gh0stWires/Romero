@@ -734,7 +734,7 @@ class WADReader(object):
         """
         os.makedirs(path, exist_ok=True)
         for level in wad['levels']:
-            base_filename=path+wad['wad_name'].split('.')[-2]+'_'+level['name']
+            base_filename=wad['wad_name'].split('.')[-2]+'_'+level['name']
             # Path relative to the dataset root that will be stored in the database
             relative_path = base_filename.replace(root_path, '')
             # Adding the features

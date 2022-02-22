@@ -11,3 +11,5 @@ epochs = int(os.environ['EPOCHS'])
 max_checkpoints = int(os.environ['MAX_CHECKPOINTS'])
 checkpoint_interval = int(os.environ['CHECKPOINT_INTERVAL'])
 image_interval = int(os.environ['IMAGE_INTERVAL'])
+wads = os.environ['WADS']
+mapdata = os.environ['MAP_DATA']

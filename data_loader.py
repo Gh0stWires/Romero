@@ -23,7 +23,7 @@ def process_image(image):
     print(f"Image shape: {img_array.shape}") if debug else None
     img_array = img_array.reshape(img_array.shape[0], img_array.shape[1], 1)
     print(f"Image shape: {img_array.shape}") if debug else None
-    tf_img = tf.image.resize_with_crop_or_pad(img_array, target_height=128, target_width=128)
+    tf_img = tf.image.resize_with_pad(img_array, target_height=128, target_width=128, method='nearest')
     print(F"Image tensor shape: {tf_img.shape}") if debug else None
     out_array = tf_img.numpy()
     print(f"Output shape: {out_array.shape}") if debug else None
