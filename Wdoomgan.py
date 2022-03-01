@@ -9,6 +9,7 @@ from image_utils import generate_and_save_images
 from model_utils import generator_optimizer, discriminator_optimizer, w_discriminator_loss, w_generator_loss
 from models import make_generator_model, make_discriminator_model
 import envirment_utils
+import model_utils
 
 # Constants
 BUFFER_SIZE = 60000
@@ -59,8 +60,8 @@ def train_step(images):
 
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
         generated_images = generator(noise, training=True)
-
-        real_output = discriminator(images, training=True)
+        #moi_z_images = model_utils.add_label_noise(generated_images, 0)
+        real_output = discriminator(generated_images, training=True)
         fake_output = discriminator(generated_images, training=True)
 
         gen_loss = w_generator_loss(fake_output)

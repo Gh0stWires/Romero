@@ -2,20 +2,21 @@ import tensorflow as tf
 import numpy as np
 import envirment_utils
 
-generator_optimizer = tf.keras.optimizers.Adam(1e-4)
-discriminator_optimizer = tf.keras.optimizers.Adam(1e-4)
+generator_optimizer = tf.keras.optimizers.Adam(2e-4)
+discriminator_optimizer = tf.keras.optimizers.Adam(2e-4)
 
 # This method returns a helper function to compute cross entropy loss
 cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
 
 def add_label_noise(labels, noise_val):
+    print(labels.shape)
     def random_val():
         return np.random.randint(0, row_size)
 
-    row_size, column_size = labels.shape
+    batch_size, row_size, column_size, alpha = labels.shape
     assert row_size == column_size
-    np_arr = labels.numpy()
+    np_arr = labels.numpy
 
     for i in range(0, row_size):
         np_arr[random_val(), random_val()] = noise_val
@@ -41,3 +42,19 @@ def discriminator_loss(real_output, fake_output):
 
 def generator_loss(fake_output):
     return cross_entropy(tf.ones_like(fake_output), fake_output)
+
+
+def w_generator_loss(fake_output):
+    return -tf.reduce_mean(fake_output)
+
+
+def w_discriminator_loss(real_output, fake_output):
+    real_loss = None
+    fake_loss = None
+
+    real_loss = -tf.reduce_mean(real_output)
+    fake_loss = -tf.reduce_mean(fake_output)
+
+    total_loss = real_loss + fake_loss
+
+    return total_loss
