@@ -2,8 +2,8 @@ import tensorflow as tf
 import numpy as np
 import envirment_utils
 
-generator_optimizer = tf.keras.optimizers.Adam(2e-4)
-discriminator_optimizer = tf.keras.optimizers.Adam(2e-4)
+generator_optimizer = tf.keras.optimizers.Adam(1e-5, beta_1=0.5)
+discriminator_optimizer = tf.keras.optimizers.RMSprop(5e-5)
 
 # This method returns a helper function to compute cross entropy loss
 cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
@@ -45,16 +45,66 @@ def generator_loss(fake_output):
 
 
 def w_generator_loss(fake_output):
-    return -tf.reduce_mean(fake_output)
+    return tf.reduce_mean(fake_output)
 
 
-def w_discriminator_loss(real_output, fake_output):
+def w_discriminator_loss(real_output, fake_output, discriminator, images, generated_images):
     real_loss = None
     fake_loss = None
 
-    real_loss = -tf.reduce_mean(real_output)
-    fake_loss = -tf.reduce_mean(fake_output)
 
-    total_loss = real_loss + fake_loss
+
+    d_regularizer = gradient_penalty(discriminator, images, generated_images)
+
+    total_loss =  (
+                tf.reduce_mean(real_output)
+                - tf.reduce_mean(fake_output)
+                + d_regularizer * 10
+        )
 
     return total_loss
+
+
+def gradient_penalty(discriminator, images, generated_images):
+    '''
+       1. get epsilon
+       2. calculate the x_hat
+       3. get gradient
+       4. regularizer
+
+       input:
+           x: real data
+           x_fake: fake data
+
+           x and x_fake must have the same batch size
+
+       '''
+
+    print(images.shape)
+    x = discriminator(images, training=True)
+    x_fake = discriminator(generated_images, training=True)
+
+    epsilon = tf.random.uniform([images.shape[0], 1, 1, 1], 0.0, 1.0)
+    x_hat = epsilon * images + (1 - epsilon) * generated_images
+    with tf.GradientTape() as t:
+        t.watch(x_hat)
+        d_hat = discriminator(x_hat)
+    gradients = t.gradient(d_hat, x_hat)
+    ddx = tf.sqrt(tf.reduce_sum(gradients ** 2, axis=[1, 2]))
+    d_regularizer = tf.reduce_mean((ddx - 1.0) ** 2)
+    return d_regularizer
+
+
+# clip model weights to a given hypercube
+class ClipConstraint(tf.keras.constraints.Constraint):
+    # set clip value when initialized
+    def __init__(self, clip_value):
+        self.clip_value = clip_value
+
+    # clip model weights to hypercube
+    def __call__(self, weights):
+        return tf.keras.backend.clip(weights, -self.clip_value, self.clip_value)
+
+    # get the config
+    def get_config(self):
+        return {'clip_value': self.clip_value}
