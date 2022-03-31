@@ -8,7 +8,7 @@ const = ClipConstraint(0.01)
 def make_generator_model():
     model = tf.keras.Sequential()
     model.add(layers.Dense(32 * 32 * 256, use_bias=False, input_shape=(100,)))
-    model.add(layers.LeakyReLU())
+    model.add(layers.LeakyReLU(alpha=0.2))
 
     model.add(layers.Reshape((32, 32, 256)))
     assert model.output_shape == (None, 32, 32, 256)  # Note: None is the batch size
@@ -29,13 +29,14 @@ def make_generator_model():
 
 def make_discriminator_model():
     model = tf.keras.Sequential()
-    model.add(layers.Conv2D(64, (4, 4), strides=(2, 2), padding='same',
+    model.add(layers.Conv2D(64, (3, 3), strides=(2, 2), padding='same',
                             input_shape=[128, 128, 1], kernel_constraint=const))
-    model.add(layers.BatchNormalization())
+    #model.add(layers.BatchNormalization())
+    model.add(layers.LayerNormalization())
     model.add(layers.LeakyReLU(alpha=0.2))
 
-    model.add(layers.Conv2D(128, (4, 4), strides=(2, 2), padding='same', kernel_constraint=const))
-    model.add(layers.BatchNormalization())
+    model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same', kernel_constraint=const))
+    model.add(layers.LayerNormalization())
     model.add(layers.LeakyReLU(alpha=0.2))
 
     model.add(layers.Flatten())

@@ -56,10 +56,11 @@ def w_discriminator_loss(real_output, fake_output, discriminator, images, genera
 
     d_regularizer = gradient_penalty(discriminator, images, generated_images)
 
+    penalty_coeffcient = 10
     total_loss =  (
-                tf.reduce_mean(real_output)
-                - tf.reduce_mean(fake_output)
-                + d_regularizer * 10
+            tf.reduce_mean(real_output)
+            - tf.reduce_mean(fake_output)
+            + d_regularizer * penalty_coeffcient
         )
 
     return total_loss
