@@ -19,41 +19,42 @@ BATCH_SIZE = envirment_utils.batch_size
 generator = make_generator_model()
 discriminator = make_discriminator_model()
 
-# Checkpoint info
-checkpoint_prefix = os.path.join(envirment_utils.checkpoint_dir, "ckpt")
-checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
-                                 discriminator_optimizer=discriminator_optimizer,
-                                 generator=generator,
-                                 discriminator=discriminator,
-                                 )
-tf_step_counter = tf.Variable(1)
-manager = tf.train.CheckpointManager(
-    checkpoint,
-    directory=envirment_utils.checkpoint_dir,
-    max_to_keep=envirment_utils.max_checkpoints,
-    checkpoint_interval=envirment_utils.checkpoint_interval,
-    step_counter=tf_step_counter,
-)
 
-# Setup Tensorboard and metrics
-train_summary_writer = tf.summary.create_file_writer(envirment_utils.tensorboard_directory)
-gen_loss_metric = tf.keras.metrics.Mean('gen_loss', dtype=tf.float32)
-disc_loss_metric = tf.keras.metrics.Mean('disc_loss', dtype=tf.float32)
+def load_data(directory, batch_size):
+    # Load image data
+    working_data = tf.keras.utils.image_dataset_from_directory(
+        directory, labels=None, label_mode=None,
+        class_names=None, color_mode='grayscale', batch_size=None, image_size=(128, 128), shuffle=True)
+
+    # Rebatch data so batch sizes are consistent
+    return working_data.batch(batch_size, drop_remainder=True)
+
+
+def generate_checkpoint_manager():
+    # Checkpoint info
+    checkpoint_prefix = os.path.join(envirment_utils.checkpoint_dir, "ckpt")
+    checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
+                                     discriminator_optimizer=discriminator_optimizer,
+                                     generator=generator,
+                                     discriminator=discriminator,
+                                     )
+    tf_step_counter = tf.Variable(1)
+    manager = tf.train.CheckpointManager(checkpoint, directory=envirment_utils.checkpoint_dir,
+                                         max_to_keep=envirment_utils.max_checkpoints,
+                                         checkpoint_interval=envirment_utils.checkpoint_interval,
+                                         step_counter=tf_step_counter, )
+    return tf_step_counter, checkpoint, manager
+
+
 
 #  Training setup
 EPOCHS = envirment_utils.epochs
+# TODO - look at moving these into either hyperparameters or local to train loop
 noise_dim = 100
 num_examples_to_generate = 16
 seed = tf.random.normal([num_examples_to_generate, noise_dim])
 
-# Load image data
-data = tf.keras.utils.image_dataset_from_directory(
-    envirment_utils.processed_directory, labels=None, label_mode=None,
-    class_names=None, color_mode='grayscale', batch_size=None, image_size=(128, 128), shuffle=True)
-#print(data.shape)
-
-data = data.batch(BATCH_SIZE, drop_remainder=True)
-#print(data.shape)
+data = load_data(envirment_utils.processed_directory, BATCH_SIZE)
 
 
 # Notice the use of `tf.function`
@@ -64,7 +65,7 @@ def train_step(images):
 
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
         generated_images = generator(noise, training=True)
-        #moi_z_images = model_utils.add_label_noise(generated_images, 0)
+        # moi_z_images = model_utils.add_label_noise(generated_images, 0)
         real_output = discriminator(images, training=True)
         fake_output = discriminator(generated_images, training=True)
 
@@ -77,6 +78,7 @@ def train_step(images):
     generator_optimizer.apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
     discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, discriminator.trainable_variables))
 
+    # TODO - move these calls to train in loop, by returning gen_loss and disc_loss from train_step()
     gen_loss_metric(gen_loss)
     disc_loss_metric(disc_loss)
     tf.print("\nGen loss:", gen_loss)
@@ -84,6 +86,10 @@ def train_step(images):
 
 
 def train(dataset, epochs):
+    step_counter, checkpoint, manager = generate_checkpoint_manager()
+
+    disc_loss_metric, gen_loss_metric, train_summary_writer = setup_tensorboard()
+
     checkpoint.restore(manager.latest_checkpoint)
     if manager.latest_checkpoint:
         print("Checkpoints restored from {}".format(manager.latest_checkpoint))
@@ -107,7 +113,7 @@ def train(dataset, epochs):
             generate_and_save_images(generator, epoch + 1, seed)
 
         print(f'Time for epoch {epoch + 1} is {time.time() - start} sec')
-        tf_step_counter.assign_add(1)
+        step_counter.assign_add(1)
 
         #  Reset metrics
         gen_loss_metric.reset_states()
@@ -116,6 +122,14 @@ def train(dataset, epochs):
     # Generate after the final epoch
     # display.clear_output(wait=True)
     generate_and_save_images(generator, epochs, seed)
+
+
+def setup_tensorboard():
+    # Setup Tensorboard and metrics
+    train_summary_writer = tf.summary.create_file_writer(envirment_utils.tensorboard_directory)
+    gen_loss_metric = tf.keras.metrics.Mean('gen_loss', dtype=tf.float32)
+    disc_loss_metric = tf.keras.metrics.Mean('disc_loss', dtype=tf.float32)
+    return disc_loss_metric, gen_loss_metric, train_summary_writer
 
 
 if __name__ == '__main__':
