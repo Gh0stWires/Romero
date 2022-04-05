@@ -11,14 +11,6 @@ from models import make_generator_model, make_discriminator_model
 import envirment_utils
 import model_utils
 
-# Constants
-BUFFER_SIZE = 60000
-BATCH_SIZE = envirment_utils.batch_size
-
-# Models
-generator = make_generator_model()
-discriminator = make_discriminator_model()
-
 
 def load_data(directory, batch_size):
     # Load image data
@@ -32,7 +24,7 @@ def load_data(directory, batch_size):
 
 def generate_checkpoint_manager():
     # Checkpoint info
-    checkpoint_prefix = os.path.join(envirment_utils.checkpoint_dir, "ckpt")
+    # checkpoint_prefix = os.path.join(envirment_utils.checkpoint_dir, "ckpt")
     checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
                                      discriminator_optimizer=discriminator_optimizer,
                                      generator=generator,
@@ -46,22 +38,11 @@ def generate_checkpoint_manager():
     return tf_step_counter, checkpoint, manager
 
 
-
-#  Training setup
-EPOCHS = envirment_utils.epochs
-# TODO - look at moving these into either hyperparameters or local to train loop
-noise_dim = 100
-num_examples_to_generate = 16
-seed = tf.random.normal([num_examples_to_generate, noise_dim])
-
-data = load_data(envirment_utils.processed_directory, BATCH_SIZE)
-
-
 # Notice the use of `tf.function`
 # This annotation causes the function to be "compiled".
 @tf.function
-def train_step(images):
-    noise = tf.random.normal([BATCH_SIZE, noise_dim])
+def train_step(images, batch_size):
+    noise = tf.random.normal([batch_size, noise_dim])
 
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
         generated_images = generator(noise, training=True)
@@ -78,14 +59,10 @@ def train_step(images):
     generator_optimizer.apply_gradients(zip(gradients_of_generator, generator.trainable_variables))
     discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, discriminator.trainable_variables))
 
-    # TODO - move these calls to train in loop, by returning gen_loss and disc_loss from train_step()
-    gen_loss_metric(gen_loss)
-    disc_loss_metric(disc_loss)
-    tf.print("\nGen loss:", gen_loss)
-    tf.print("Disc loss:", disc_loss)
+    return gen_loss, disc_loss
 
 
-def train(dataset, epochs):
+def train(dataset, epochs, batch_size, seed):
     step_counter, checkpoint, manager = generate_checkpoint_manager()
 
     disc_loss_metric, gen_loss_metric, train_summary_writer = setup_tensorboard()
@@ -100,7 +77,11 @@ def train(dataset, epochs):
         start = time.time()
 
         for image_batch in dataset:
-            train_step(image_batch)
+            gen_loss, disc_loss = train_step(image_batch, batch_size)
+            tf.print("\nGen loss:", gen_loss)
+            tf.print("Disc loss:", disc_loss)
+            gen_loss_metric(gen_loss)
+            disc_loss_metric(disc_loss)
 
         with train_summary_writer.as_default():
             tf.summary.scalar('gen_loss', gen_loss_metric.result(), step=epoch)
@@ -132,5 +113,19 @@ def setup_tensorboard():
     return disc_loss_metric, gen_loss_metric, train_summary_writer
 
 
+# TODO - If we use hyper parameters in building models, then these should be moved into main
+# Models
+generator = make_generator_model()
+discriminator = make_discriminator_model()
+
 if __name__ == '__main__':
-    train(data, int(envirment_utils.epochs))
+    batch_size = envirment_utils.batch_size
+    data = load_data(envirment_utils.processed_directory, batch_size)
+
+    #  Training setup
+    noise_dim = 100
+    num_examples_to_generate = 16
+    seed = tf.random.normal([num_examples_to_generate, noise_dim])
+
+    # TODO - Add loop to vary hyperparameters.
+    train(data, envirment_utils.epochs, batch_size, seed)
