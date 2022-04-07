@@ -2,6 +2,8 @@ import os
 from tabnanny import check
 import time
 import tensorflow as tf
+from tensorboard.plugins.hparams import api as hp
+
 import envirment_utils
 # from IPython import display
 
@@ -116,6 +118,14 @@ def setup_tensorboard():
     return disc_loss_metric, gen_loss_metric, train_summary_writer
 
 
+HP_EPOCHS = hp.HParam('epochs', hp.Discrete([10, 100]))
+HP_NORMALIZE_DISCRIMINATOR = hp.HParam('normalize_discriminator', hp.Discrete([True, False]))
+HP_OPTIMIZER = hp.HParam('optimizer', hp.Discrete(['adam', 'sgd']))
+
+
+METRIC_ACCURACY = 'accuracy'
+
+
 # Models
 if __name__ == '__main__':
     batch_size = envirment_utils.batch_size
@@ -127,4 +137,4 @@ if __name__ == '__main__':
     seed = tf.random.normal([num_examples_to_generate, noise_dim])
 
     # TODO - Add loop to vary hyper parameters.
-    train(data, envirment_utils.epochs, batch_size, seed, true)
+    train(data, envirment_utils.epochs, batch_size, seed, True)
