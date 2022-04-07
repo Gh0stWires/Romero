@@ -22,7 +22,7 @@ def load_data(directory, batch_size):
     return working_data.batch(batch_size, drop_remainder=True)
 
 
-def generate_checkpoint_manager():
+def generate_checkpoint_manager(generator, discriminator):
     # Checkpoint info
     # checkpoint_prefix = os.path.join(envirment_utils.checkpoint_dir, "ckpt")
     checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
@@ -41,7 +41,7 @@ def generate_checkpoint_manager():
 # Notice the use of `tf.function`
 # This annotation causes the function to be "compiled".
 @tf.function
-def train_step(images, batch_size):
+def train_step(generator, discriminator, images, batch_size):
     noise = tf.random.normal([batch_size, noise_dim])
 
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
@@ -62,8 +62,11 @@ def train_step(images, batch_size):
     return gen_loss, disc_loss
 
 
-def train(dataset, epochs, batch_size, seed):
-    step_counter, checkpoint, manager = generate_checkpoint_manager()
+def train(dataset, epochs, batch_size, seed, normalize_discriminator):
+    generator = make_generator_model()
+    discriminator = make_discriminator_model(normalize_discriminator)
+
+    step_counter, checkpoint, manager = generate_checkpoint_manager(generator, discriminator)
 
     disc_loss_metric, gen_loss_metric, train_summary_writer = setup_tensorboard()
 
@@ -77,7 +80,7 @@ def train(dataset, epochs, batch_size, seed):
         start = time.time()
 
         for image_batch in dataset:
-            gen_loss, disc_loss = train_step(image_batch, batch_size)
+            gen_loss, disc_loss = train_step(generator, discriminator, image_batch, batch_size)
             tf.print("\nGen loss:", gen_loss)
             tf.print("Disc loss:", disc_loss)
             gen_loss_metric(gen_loss)
@@ -113,11 +116,7 @@ def setup_tensorboard():
     return disc_loss_metric, gen_loss_metric, train_summary_writer
 
 
-# TODO - If we use hyper parameters in building models, then these should be moved into main
 # Models
-generator = make_generator_model()
-discriminator = make_discriminator_model()
-
 if __name__ == '__main__':
     batch_size = envirment_utils.batch_size
     data = load_data(envirment_utils.processed_directory, batch_size)
@@ -127,5 +126,5 @@ if __name__ == '__main__':
     num_examples_to_generate = 16
     seed = tf.random.normal([num_examples_to_generate, noise_dim])
 
-    # TODO - Add loop to vary hyperparameters.
-    train(data, envirment_utils.epochs, batch_size, seed)
+    # TODO - Add loop to vary hyper parameters.
+    train(data, envirment_utils.epochs, batch_size, seed, true)

@@ -27,16 +27,20 @@ def make_generator_model():
     return model
 
 
-def make_discriminator_model():
+def make_discriminator_model(normalize):
     model = tf.keras.Sequential()
     model.add(layers.Conv2D(64, (3, 3), strides=(2, 2), padding='same',
                             input_shape=[128, 128, 1], kernel_constraint=const))
-    #model.add(layers.BatchNormalization())
-    model.add(layers.LayerNormalization())
+    if normalize:
+        model.add(layers.LayerNormalization())
+
     model.add(layers.LeakyReLU(alpha=0.2))
 
     model.add(layers.Conv2D(128, (3, 3), strides=(2, 2), padding='same', kernel_constraint=const))
-    model.add(layers.LayerNormalization())
+
+    if normalize:
+        model.add(layers.LayerNormalization())
+
     model.add(layers.LeakyReLU(alpha=0.2))
 
     model.add(layers.Flatten())
