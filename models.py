@@ -4,7 +4,7 @@ from tensorflow.keras import layers
 from model_utils import ClipConstraint
 
 const = ClipConstraint(0.01)
-# FIXME - update to match doom
+
 def make_generator_model():
     model = tf.keras.Sequential()
     model.add(layers.Dense(32 * 32 * 256, use_bias=False, input_shape=(100,)))

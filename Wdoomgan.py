@@ -3,12 +3,13 @@ from tabnanny import check
 import time
 import tensorflow as tf
 from tensorboard.plugins.hparams import api as hp
+import itertools
 
 import envirment_utils
 # from IPython import display
 
 from image_utils import generate_and_save_images
-from model_utils import generator_optimizer, discriminator_optimizer, w_discriminator_loss, w_generator_loss
+from model_utils import discriminator_optimizer, w_discriminator_loss, w_generator_loss
 from models import make_generator_model, make_discriminator_model
 import envirment_utils
 import model_utils
@@ -24,7 +25,7 @@ def load_data(directory, batch_size):
     return working_data.batch(batch_size, drop_remainder=True)
 
 
-def generate_checkpoint_manager(generator, discriminator):
+def generate_checkpoint_manager(generator, discriminator, generator_optimizer):
     # Checkpoint info
     # checkpoint_prefix = os.path.join(envirment_utils.checkpoint_dir, "ckpt")
     checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
@@ -43,7 +44,7 @@ def generate_checkpoint_manager(generator, discriminator):
 # Notice the use of `tf.function`
 # This annotation causes the function to be "compiled".
 @tf.function
-def train_step(generator, discriminator, images, batch_size):
+def train_step(generator, discriminator, generator_optimizer, images, batch_size):
     noise = tf.random.normal([batch_size, noise_dim])
 
     with tf.GradientTape() as gen_tape, tf.GradientTape() as disc_tape:
@@ -64,11 +65,15 @@ def train_step(generator, discriminator, images, batch_size):
     return gen_loss, disc_loss
 
 
-def train(dataset, epochs, batch_size, seed, normalize_discriminator):
+def train(dataset, batch_size, seed, hparams):
+    # Setup models, optimizers, etc.
     generator = make_generator_model()
-    discriminator = make_discriminator_model(normalize_discriminator)
+    discriminator = make_discriminator_model(hparams[HP_NORMALIZE_DISCRIMINATOR])
+    g_optimizer = model_utils.generator_optimizer(hparams[HP_GENERATOR_OPTIMIZER])
 
-    step_counter, checkpoint, manager = generate_checkpoint_manager(generator, discriminator)
+    # TODO - This needs to vary checkppoint dictionary base directory to match hParams
+    # Setup checkpoint manager
+    step_counter, checkpoint, manager = generate_checkpoint_manager(generator, discriminator, g_optimizer)
 
     disc_loss_metric, gen_loss_metric, train_summary_writer = setup_tensorboard()
 
@@ -109,6 +114,13 @@ def train(dataset, epochs, batch_size, seed, normalize_discriminator):
     # display.clear_output(wait=True)
     generate_and_save_images(generator, epochs, seed)
 
+# TODO - Adapt for DOOM!!!
+# def run_hparam_testing(run_dir, hparams, train_ds, val_ds, test_ds):
+#     with tf.summary.create_file_writer(run_dir).as_default():
+#         hp.hparams(hparams)  # record the values used in this trial
+#         accuracy = self.training_loop(train_ds, val_ds, test_ds, hparams)
+#         tf.summary.scalar(METRIC_ACCURACY, accuracy, step=1)
+
 
 def setup_tensorboard():
     # Setup Tensorboard and metrics
@@ -120,11 +132,16 @@ def setup_tensorboard():
 
 HP_EPOCHS = hp.HParam('epochs', hp.Discrete([10, 100]))
 HP_NORMALIZE_DISCRIMINATOR = hp.HParam('normalize_discriminator', hp.Discrete([True, False]))
-HP_OPTIMIZER = hp.HParam('optimizer', hp.Discrete(['adam', 'sgd']))
+HP_GENERATOR_OPTIMIZER = hp.HParam('optimizer', hp.Discrete(['adam', 'sgd']))
 
 
 METRIC_ACCURACY = 'accuracy'
-
+selected_hparams = [HP_EPOCHS, HP_NORMALIZE_DISCRIMINATOR, HP_GENERATOR_OPTIMIZER]
+with tf.summary.create_file_writer('logs/hparam_tuning').as_default():
+    hp.hparams_config(
+        hparams= selected_hparams,
+        metrics=[hp.Metric(METRIC_ACCURACY, display_name='Accuracy')],
+    )
 
 # Models
 if __name__ == '__main__':
@@ -135,6 +152,21 @@ if __name__ == '__main__':
     noise_dim = 100
     num_examples_to_generate = 16
     seed = tf.random.normal([num_examples_to_generate, noise_dim])
+    # hparams = []
+    hparam_domains = [i.domain.values for i in selected_hparams]
 
-    # TODO - Add loop to vary hyper parameters.
-    train(data, envirment_utils.epochs, batch_size, seed, True)
+    session_num = 0
+    for epochs, discriminator, optimizer in itertools.product(*hparam_domains):
+        generated_hparams = {
+            HP_EPOCHS: epochs,
+            HP_NORMALIZE_DISCRIMINATOR: discriminator,
+            HP_GENERATOR_OPTIMIZER: optimizer
+        }
+
+        print(f'--- Starting trial: {session_num}')
+        session_num += 1
+
+        train(data, batch_size, seed, generated_hparams)
+
+    print("Finished HP loop")
+

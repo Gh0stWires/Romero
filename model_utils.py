@@ -2,7 +2,16 @@ import tensorflow as tf
 import numpy as np
 import envirment_utils
 
-generator_optimizer = tf.keras.optimizers.Adam(1e-5, beta_1=0.5)
+g_opt_switcher = {
+    "Adam": tf.keras.optimizers.Adam(1e-5, beta_1=0.5),
+    "SGD": tf.keras.optimizers.SGD(1e-5)
+}
+
+
+def generator_optimizer(opt_type):
+    return g_opt_switcher[opt_type]
+
+
 discriminator_optimizer = tf.keras.optimizers.RMSprop(5e-5)
 
 # This method returns a helper function to compute cross entropy loss
@@ -11,6 +20,7 @@ cross_entropy = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
 def add_label_noise(labels, noise_val):
     print(labels.shape)
+
     def random_val():
         return np.random.randint(0, row_size)
 
@@ -52,16 +62,14 @@ def w_discriminator_loss(real_output, fake_output, discriminator, images, genera
     real_loss = None
     fake_loss = None
 
-
-
     d_regularizer = gradient_penalty(discriminator, images, generated_images)
 
     penalty_coeffcient = 10
-    total_loss =  (
+    total_loss = (
             tf.reduce_mean(real_output)
             - tf.reduce_mean(fake_output)
             + d_regularizer * penalty_coeffcient
-        )
+    )
 
     return total_loss
 
