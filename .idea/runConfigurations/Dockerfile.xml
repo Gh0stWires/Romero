@@ -3,7 +3,6 @@
     <deployment type="dockerfile">
       <settings>
         <option name="imageTag" value="doom_gan_image" />
-        <option name="buildOnly" value="true" />
         <option name="containerName" value="doom_gan_container" />
         <option name="envVars">
           <list>
@@ -15,6 +14,42 @@
               <option name="name" value="PROCESSED_IMAGES" />
               <option name="value" value="/app/processed_images" />
             </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="EPOCHS" />
+              <option name="value" value="100" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="CHECKPOINT_DIR" />
+              <option name="value" value="/tmp/doom_checkpoints/" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="BATCH_SIZE" />
+              <option name="value" value="256" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="ADD_LABEL_NOISE" />
+              <option name="value" value="false" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="CHECKPOINT_INTERVAL" />
+              <option name="value" value="3" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="SHOW_PLOTS" />
+              <option name="value" value="true" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="IMAGE_INTERVAL" />
+              <option name="value" value="2" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="TENSORBOARD_DIR" />
+              <option name="value" value="/tmp/doom_tensorboard/" />
+            </DockerEnvVarImpl>
+            <DockerEnvVarImpl>
+              <option name="name" value="PYTHONUNBUFFERED" />
+              <option name="value" value="1" />
+            </DockerEnvVarImpl>
           </list>
         </option>
         <option name="sourceFilePath" value="Dockerfile" />
@@ -22,7 +57,7 @@
           <list>
             <DockerVolumeBindingImpl>
               <option name="containerPath" value="/app/processed_images" />
-              <option name="hostPath" value="$PROJECT_DIR$/processed-images" />
+              <option name="hostPath" value="$USER_HOME$/processed_images" />
               <option name="readOnly" value="true" />
             </DockerVolumeBindingImpl>
           </list>

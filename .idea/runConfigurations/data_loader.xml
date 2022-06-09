@@ -1,29 +1,30 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="doomgan" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+  <configuration default="false" name="data_loader" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
     <module name="Romero" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
       <env name="PYTHONUNBUFFERED" value="1" />
       <env name="DOOM_OUTPUT_DIRECTORY" value="C:\Users\gh0st\Documents\Romero\output" />
+      <env name="SHOW_PLOTS" value="true" />
       <env name="BATCH_SIZE" value="16" />
       <env name="EPOCHS" value="10000" />
       <env name="MAX_CHECKPOINTS" value="5" />
       <env name="CHECKPOINT_INTERVAL" value="100" />
-      <env name="IMAGE_INTERVAL" value="5" />
+      <env name="IMAGE_INTERVAL" value="10" />
       <env name="PROCESSED_IMAGES" value="C:\Users\gh0st\Documents\Romero\processed_images" />
       <env name="CHECKPOINT_DIR" value="C:\Users\gh0st\Documents\Romero\checkpoints" />
       <env name="TENSORBOARD_DIR" value="C:\Users\gh0st\Documents\Romero\tensorboard" />
       <env name="ADD_LABEL_NOISE" value="false" />
-      <env name="SHOW_PLOTS" value="false" />
+      <env name="MAP_DATA" value="C:\Users\gh0st\Documents\Romero\map-data" />
+      <env name="WADS" value="C:\Users\gh0st\Documents\Romero\wads" />
     </envs>
     <option name="SDK_HOME" value="" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <option name="IS_MODULE_SDK" value="true" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
-    <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/doomgan.py" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data_loader.py" />
     <option name="PARAMETERS" value="" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
