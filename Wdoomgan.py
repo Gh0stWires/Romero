@@ -14,6 +14,7 @@ from models import make_generator_model, make_discriminator_model
 import envirment_utils
 import model_utils
 
+tf_step_counter = tf.Variable(1)
 
 def load_data(directory, batch_size):
     # Load image data
@@ -33,7 +34,7 @@ def generate_checkpoint_manager(generator, discriminator, generator_optimizer):
                                      generator=generator,
                                      discriminator=discriminator,
                                      )
-    tf_step_counter = tf.Variable(1)
+
     manager = tf.train.CheckpointManager(checkpoint, directory=envirment_utils.checkpoint_dir,
                                          max_to_keep=envirment_utils.max_checkpoints,
                                          checkpoint_interval=envirment_utils.checkpoint_interval,
@@ -85,9 +86,9 @@ def train(dataset, batch_size, seed, hparams):
 
     for epoch in range(epochs):
         start = time.time()
-
+        # generator, discriminator, generator_optimizer, images, batch_size
         for image_batch in dataset:
-            gen_loss, disc_loss = train_step(generator, discriminator, image_batch, batch_size)
+            gen_loss, disc_loss = train_step(generator, discriminator, g_optimizer, image_batch, batch_size)
             tf.print("\nGen loss:", gen_loss)
             tf.print("Disc loss:", disc_loss)
             gen_loss_metric(gen_loss)
@@ -152,7 +153,6 @@ if __name__ == '__main__':
     noise_dim = 100
     num_examples_to_generate = 16
     seed = tf.random.normal([num_examples_to_generate, noise_dim])
-    # hparams = []
     hparam_domains = [i.domain.values for i in selected_hparams]
 
     session_num = 0

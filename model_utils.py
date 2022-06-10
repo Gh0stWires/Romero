@@ -3,13 +3,13 @@ import numpy as np
 import envirment_utils
 
 g_opt_switcher = {
-    "Adam": tf.keras.optimizers.Adam(1e-5, beta_1=0.5),
-    "SGD": tf.keras.optimizers.SGD(1e-5)
+    "adam": tf.keras.optimizers.Adam(1e-5, beta_1=0.5),
+    "sgd": tf.keras.optimizers.SGD(1e-5)
 }
 
 
 def generator_optimizer(opt_type):
-    return g_opt_switcher[opt_type]
+    return g_opt_switcher[opt_type.lower()]
 
 
 discriminator_optimizer = tf.keras.optimizers.RMSprop(5e-5)
