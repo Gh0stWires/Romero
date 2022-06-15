@@ -62,7 +62,7 @@ def generate_checkpoint_manager(generator, discriminator, generator_optimizer):
 
     manager = tf.train.CheckpointManager(
         checkpoint,
-        directory=envirment_utils.checkpoint_dir,
+        directory=f'{envirment_utils.checkpoint_dir}/trial-{step_counter}',
         max_to_keep=envirment_utils.max_checkpoints,
         checkpoint_interval=envirment_utils.checkpoint_interval,
         step_counter=step_counter,
@@ -108,13 +108,12 @@ def train(dataset, batch_size, seed, hparams):
     discriminator = make_discriminator_model(hparams[HP_NORMALIZE_DISCRIMINATOR])
     g_optimizer = model_utils.generator_optimizer(hparams[HP_GENERATOR_OPTIMIZER])
 
-    # TODO - This needs to vary checkppoint dictionary base directory to match hParams
     # Setup checkpoint manager
     step_counter, checkpoint, manager = generate_checkpoint_manager(
         generator, discriminator, g_optimizer
     )
 
-    disc_loss_metric, gen_loss_metric, train_summary_writer = setup_tensorboard()
+    disc_loss_metric, gen_loss_metric, train_summary_writer = setup_tensorboard(step_counter)
 
     checkpoint.restore(manager.latest_checkpoint)
     if manager.latest_checkpoint:
@@ -125,19 +124,15 @@ def train(dataset, batch_size, seed, hparams):
     for epoch in range(epochs):
         start = time.time()
 
-
         for image_batch in dataset:
-            # generator, discriminator, images, batch_size, generator_optimizer
-            # trainer = tf.function(train_step).get_concrete_function(generator, discriminator, image_batch, batch_size, g_optimizer)
             gen_loss, disc_loss = train_step(generator, discriminator, image_batch, batch_size, g_optimizer)
             tf.print("\nGen loss:", gen_loss)
             tf.print("Disc loss:", disc_loss)
             gen_loss_metric(gen_loss)
             disc_loss_metric(disc_loss)
 
-        with train_summary_writer.as_default():
-            tf.summary.scalar("gen_loss", gen_loss_metric.result(), step=epoch)
-            tf.summary.scalar("disc_loss", disc_loss_metric.result(), step=epoch)
+        # with train_summary_writer.as_default():
+        run_hparam_testing(train_summary_writer, hparams, epoch, gen_loss_metric, disc_loss_metric)
 
         # Save the model every N epochs
         manager.save()
@@ -157,18 +152,19 @@ def train(dataset, batch_size, seed, hparams):
     generate_and_save_images(generator, epochs, seed)
 
 
-# TODO - Adapt for DOOM!!!
-# def run_hparam_testing(run_dir, hparams, train_ds, val_ds, test_ds):
-#     with tf.summary.create_file_writer(run_dir).as_default():
-#         hp.hparams(hparams)  # record the values used in this trial
-#         accuracy = self.training_loop(train_ds, val_ds, test_ds, hparams)
-#         tf.summary.scalar(METRIC_ACCURACY, accuracy, step=1)
+def run_hparam_testing(train_summary_writer, hparams, step_counter, gen_loss_metric, disc_loss_metric):
+    with train_summary_writer.as_default():
+        hp.hparams(hparams)
+        # record the values used in this trial
+        tf.summary.scalar("loss/gen_loss", gen_loss_metric.result(), step=step_counter)
+        tf.summary.scalar("loss/disc_loss", disc_loss_metric.result(), step=step_counter)
 
 
-def setup_tensorboard():
+
+def setup_tensorboard(step_count):
     # Setup Tensorboard and metrics
     train_summary_writer = tf.summary.create_file_writer(
-        envirment_utils.tensorboard_directory
+        f"{envirment_utils.tensorboard_directory}/trial-{step_count}"
     )
     gen_loss_metric = tf.keras.metrics.Mean("gen_loss", dtype=tf.float32)
     disc_loss_metric = tf.keras.metrics.Mean("disc_loss", dtype=tf.float32)
@@ -201,16 +197,15 @@ if __name__ == "__main__":
     seed = tf.random.normal([num_examples_to_generate, noise_dim])
     hparam_domains = [i.domain.values for i in selected_hparams]
 
-    session_num = 0
+    trial_num = 0
     for epochs, discriminator, optimizer in itertools.product(*hparam_domains):
         generated_hparams = {
             HP_EPOCHS: epochs,
             HP_NORMALIZE_DISCRIMINATOR: discriminator,
             HP_GENERATOR_OPTIMIZER: optimizer,
         }
-
-        print(f"--- Starting trial: {session_num}")
-        session_num += 1
+        trial_num += 1
+        print(f"--- Starting trial: {trial_num}")
 
         train(data, batch_size, seed, generated_hparams)
 
