@@ -1,30 +1,30 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="data_loader" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+  <configuration default="false" name="wadFeatureExtraction" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
     <module name="Romero" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
-      <env name="PYTHONUNBUFFERED" value="1" />
-      <env name="DOOM_OUTPUT_DIRECTORY" value="$PROJECT_DIR$/output" />
-      <env name="BATCH_SIZE" value="16" />
-      <env name="EPOCHS" value="10000" />
-      <env name="MAX_CHECKPOINTS" value="5" />
-      <env name="CHECKPOINT_INTERVAL" value="100" />
-      <env name="IMAGE_INTERVAL" value="5" />
-      <env name="PROCESSED_IMAGES" value="$PROJECT_DIR$/processed-images" />
-      <env name="CHECKPOINT_DIR" value="$PROJECT_DIR$/checkpoints" />
-      <env name="TENSORBOARD_DIR" value="$PROJECT_DIR$/tensorboard" />
       <env name="ADD_LABEL_NOISE" value="false" />
-      <env name="SHOW_PLOTS" value="false" />
-      <env name="WADS" value="$PROJECT_DIR$/WADS" />
+      <env name="BATCH_SIZE" value="16" />
+      <env name="CHECKPOINT_DIR" value="$PROJECT_DIR$/checkpoints" />
+      <env name="CHECKPOINT_INTERVAL" value="100" />
+      <env name="DOOM_OUTPUT_DIRECTORY" value="$PROJECT_DIR$/output" />
+      <env name="EPOCHS" value="10000" />
+      <env name="IMAGE_INTERVAL" value="5" />
       <env name="MAP_DATA" value="$PROJECT_DIR$/map-data" />
+      <env name="MAX_CHECKPOINTS" value="5" />
+      <env name="PROCESSED_IMAGES" value="$PROJECT_DIR$/processed-images" />
+      <env name="PYTHONUNBUFFERED" value="1" />
+      <env name="SHOW_PLOTS" value="false" />
+      <env name="TENSORBOARD_DIR" value="$PROJECT_DIR$/tensorboard" />
+      <env name="WADS" value="$PROJECT_DIR$/wads" />
     </envs>
-    <option name="SDK_HOME" value="" />
+    <option name="SDK_HOME" value="C:\Users\tonon\PycharmProjects\Romero\venv\Scripts\python.exe" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-    <option name="IS_MODULE_SDK" value="true" />
+    <option name="IS_MODULE_SDK" value="false" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
-    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data_loader.py" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/wadFeatureExtraction.py" />
     <option name="PARAMETERS" value="" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />

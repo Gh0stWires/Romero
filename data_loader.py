@@ -3,7 +3,7 @@ import numpy as np
 import PIL
 import tensorflow as tf
 from pathlib import Path
-
+import os
 
 
 import envirment_utils
@@ -15,6 +15,8 @@ def pre_process(directory):
     data_dir = pathlib.Path(directory)
     files = list(data_dir.glob('*wallmap.png'))
     print(f"Image count: {len(files)}")
+    if not os.path.exists(envirment_utils.processed_directory):
+        os.makedirs(envirment_utils.processed_directory)
     for file in files:
         process_image(file)
 
@@ -41,7 +43,6 @@ def process_image(image):
     final_image[final_image > 0] = 255
     imfile = PIL.Image.fromarray(final_image)
     imfile.save(Path(get_processed_image_path(image.name)))
-
 
 
 def get_processed_image_path(name):
