@@ -1,6 +1,5 @@
 import os
 import envirment_utils
-import json
 
 
 def batch_check():

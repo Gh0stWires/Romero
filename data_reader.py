@@ -27,5 +27,5 @@ def trial_reader(trial_num):
 
 
 if __name__ == '__main__':
-    trial_num_promt = input('Desigate trial number: ')
-    trial_reader(trial_num_promt)
+    trial_num_prompt = input('Designate trial number: ')
+    trial_reader(trial_num_prompt)

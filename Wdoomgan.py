@@ -61,7 +61,7 @@ def generate_checkpoint_manager(generator, discriminator, generator_optimizer, t
     print(f'{envirment_utils.checkpoint_dir}/trial-{trial_num}/')
     manager = tf.train.CheckpointManager(
         checkpoint,
-        directory=f'{envirment_utils.checkpoint_dir}/trial-{trial_num}/',
+        directory=f'{envirment_utils.checkpoint_dir}trial-{trial_num}/',
         max_to_keep=envirment_utils.max_checkpoints,
         checkpoint_interval=envirment_utils.checkpoint_interval,
         step_counter=step_counter,
@@ -254,7 +254,7 @@ if __name__ == "__main__":
     seed = tf.random.normal([num_examples_to_generate, noise_dim])
     hparam_domains = [i.domain.values for i in selected_hparams]
     # TODO: Handle for this making sense with other trials being present and hparams is on.
-    trial_num = 13  # Set this to run a specific trial with Hparams turned off
+    trial_num = 14  # Set this to run a specific trial with Hparams turned off
 
 
     if hparam_training:
