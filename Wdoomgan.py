@@ -31,6 +31,7 @@ tf_step_counter = Count()
 hparam_training = False # Set to true to perform Hyper parameter trial runs for training
 now = datetime.datetime.now()
 
+
 def load_data(directory, batch_size):
     # Load image data
     working_data = tf.keras.utils.image_dataset_from_directory(
@@ -50,8 +51,7 @@ def load_data(directory, batch_size):
 
 def generate_checkpoint_manager(generator, discriminator, generator_optimizer, trial_num):
     # Checkpoint info
-    step_counter = tf_step_counter()
-
+    step = tf.Variable(0)
     checkpoint = tf.train.Checkpoint(
         generator_optimizer=generator_optimizer,
         discriminator_optimizer=discriminator_optimizer,
@@ -64,9 +64,9 @@ def generate_checkpoint_manager(generator, discriminator, generator_optimizer, t
         directory=f'{envirment_utils.checkpoint_dir}trial-{trial_num}/',
         max_to_keep=envirment_utils.max_checkpoints,
         checkpoint_interval=envirment_utils.checkpoint_interval,
-        step_counter=step_counter,
+        step_counter=step,
     )
-    return step_counter, checkpoint, manager
+    return step, checkpoint, manager
 
 
 def train_step(generator, discriminator, images, batch_size, generator_optimizer):
@@ -109,7 +109,8 @@ def train(dataset, batch_size, seed, hparams, trial_num):
         generator, discriminator, g_optimizer, trial_num
     )
 
-    disc_loss_metric, gen_loss_metric, train_summary_writer = setup_tensorboard(step_counter)
+    if hparam_training:
+        disc_loss_metric, gen_loss_metric, train_summary_writer = setup_tensorboard(step_counter)
 
     checkpoint.restore(manager.latest_checkpoint)
 
@@ -125,15 +126,19 @@ def train(dataset, batch_size, seed, hparams, trial_num):
             gen_loss, disc_loss = train_step(generator, discriminator, image_batch, batch_size, g_optimizer)
             tf.print("\nGen loss:", gen_loss)
             tf.print("Disc loss:", disc_loss)
-            gen_loss_metric(gen_loss)
-            disc_loss_metric(disc_loss)
+
+            if hparam_training:
+                gen_loss_metric(gen_loss)
+                disc_loss_metric(disc_loss)
 
         # with train_summary_writer.as_default():
         if hparam_training:
             write_hparam_metrics(train_summary_writer, hparams, epoch, gen_loss_metric, disc_loss_metric)
 
         # Save the model every N epochs
-        manager.save()
+        # manager._checkpoint_interval
+        step_counter.assign_add(1)
+        manager.save(epoch)
 
         if (epoch + 1) % envirment_utils.image_interval == 0:
             generate_and_save_images(generator, epoch + 1, seed, trial_num, now)
@@ -142,9 +147,11 @@ def train(dataset, batch_size, seed, hparams, trial_num):
             break
 
         print(f"Time for epoch {epoch + 1} is {time.time() - start} sec")
+
+        if hparam_training:
         #  Reset metrics
-        gen_loss_metric.reset_states()
-        disc_loss_metric.reset_states()
+            gen_loss_metric.reset_states()
+            disc_loss_metric.reset_states()
 
     # Generate after the final epoch
     # display.clear_output(wait=True)
@@ -220,7 +227,7 @@ def training_setup(trial_num, hparams, skip_description=True):
 def setup_tensorboard(step_count):
     # Setup Tensorboard and metrics
     train_summary_writer = tf.summary.create_file_writer(
-        f"{envirment_utils.tensorboard_directory}/trial-{step_count}"
+        f"{envirment_utils.tensorboard_directory}trial-{step_count}"
     )
     gen_loss_metric = tf.keras.metrics.Mean("gen_loss", dtype=tf.float32)
     disc_loss_metric = tf.keras.metrics.Mean("disc_loss", dtype=tf.float32)
@@ -254,7 +261,7 @@ if __name__ == "__main__":
     seed = tf.random.normal([num_examples_to_generate, noise_dim])
     hparam_domains = [i.domain.values for i in selected_hparams]
     # TODO: Handle for this making sense with other trials being present and hparams is on.
-    trial_num = 14  # Set this to run a specific trial with Hparams turned off
+    trial_num = 16  # Set this to run a specific trial with Hparams turned off
 
 
     if hparam_training:

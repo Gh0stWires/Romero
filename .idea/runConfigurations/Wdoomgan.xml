@@ -7,10 +7,10 @@
       <env name="ADD_LABEL_NOISE" value="false" />
       <env name="BATCH_SIZE" value="106" />
       <env name="CHECKPOINT_DIR" value="$PROJECT_DIR$/checkpoints/" />
-      <env name="CHECKPOINT_INTERVAL" value="1000" />
+      <env name="CHECKPOINT_INTERVAL" value="10" />
       <env name="DOOM_OUTPUT_DIRECTORY" value="$PROJECT_DIR$/output/" />
-      <env name="EPOCHS" value="200000" />
-      <env name="IMAGE_INTERVAL" value="2000" />
+      <env name="EPOCHS" value="1000" />
+      <env name="IMAGE_INTERVAL" value="100" />
       <env name="MAP_DATA" value="$PROJECT_DIR$/map-data/" />
       <env name="MAX_CHECKPOINTS" value="5" />
       <env name="PROCESSED_IMAGES" value="$PROJECT_DIR$/processed_images/" />
