@@ -117,3 +117,4 @@ class ClipConstraint(tf.keras.constraints.Constraint):
     # get the config
     def get_config(self):
         return {'clip_value': self.clip_value}
+

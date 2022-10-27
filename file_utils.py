@@ -1,5 +1,14 @@
 import os
 import envirment_utils
+from PIL import Image
+import numpy as np
+import cv2
+# from model_utils import load_a_model
+
+def invert_pixel_colors(image_path, file_path):
+    img = cv2.imread(image_path)
+    invert = cv2.bitwise_not(img)
+    cv2.imwrite(img=invert, filename='./output/invert-200k.png')
 
 
 def batch_check():
@@ -29,3 +38,5 @@ def trailing_slash_check(dir_path):
     except Exception as err:
         print(err)
 
+if __name__ == '__main__':
+    print(os.environ['WADS'])

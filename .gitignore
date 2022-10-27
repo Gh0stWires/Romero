@@ -1,8 +1,11 @@
 /venv/
 __pycache__/
 processed_images/
-processed_images-10/
 output/
 tensorboard/
 logs/
 checkpoints/
+preds/
+weights/
+saved_models/
+.env
