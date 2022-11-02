@@ -27,7 +27,7 @@ def get_mirror_from_page(url):
 
         for i in mirrors:
 
-            if i.a.text == 'New York (SSL)':
+            if i.a.text == 'Germany (SSL)':
                 return i.a['href']
             else:
                 continue
@@ -38,24 +38,25 @@ def get_mirror_from_page(url):
 def get_levels():
     URLS = []
 
-    for i in range(1, 9):
-        host = 'https://www.doomworld.com/idgames/'
-        link = f'{host}/index.php?search&page={i}&field=textfile&word=32+levels&sort=time&order=asc'
-        html_doc = get(link, headers=get_header(), verify=False)
 
-        if html_doc.status_code == 200:
-            soup = BeautifulSoup(html_doc.text, 'html.parser')
-            names = soup.find_all('td', attrs={'class': 'wadlisting_name'})
+    host = 'https://www.doomworld.com/idgames/'
+    link = f'{host}/levels/doom2/d-f/'
+    html_doc = get(link, headers=get_header(), verify=False)
 
-            for i in names:
-                url_path = host + i.a['href']
-                if 'levels/' in url_path:
-                    URLS.append(get_mirror_from_page(url_path))
+    if html_doc.status_code == 200:
+        soup = BeautifulSoup(html_doc.text, 'html.parser')
+        names = soup.find_all('td', attrs={'class': 'wadlisting_name'})
 
-        return URLS
+        for i in names:
+            url_path = host + i.a['href']
+            if 'levels/' in url_path:
+                URLS.append(get_mirror_from_page(url_path))
+    print(URLS)
+    return URLS
 
 
 def download_levels(levels_list, path):
+    print(levels_list)
     for url in levels_list:
         res = None
         try:
