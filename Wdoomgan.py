@@ -40,7 +40,7 @@ class Count(tf.Module):
 
 
 tf_step_counter = Count()
-hparam_training = True # Set to true to perform Hyper parameter trial runs for training
+hparam_training = False # Set to true to perform Hyper parameter trial runs for training
 now = datetime.datetime.now()
 
 
@@ -127,11 +127,11 @@ def train(dataset, batch_size, seed, hparams, trial_num, hpram_dir_target=''):
 
     # Setup checkpoint manager
     step_counter, checkpoint, manager, hparam_dir_target = generate_checkpoint_manager(
-        generator, discriminator, g_optimizer, trial_num
+        generator, discriminator, g_optimizer, trial_num, hpram_dir_target
     )
 
-    if hparam_training:
-        disc_loss_metric, gen_loss_metric, train_summary_writer = setup_tensorboard(trial_num=trial_num)
+    #if hparam_training:
+    disc_loss_metric, gen_loss_metric, train_summary_writer = setup_tensorboard(trial_num=trial_num)
 
     checkpoint.restore(manager.latest_checkpoint)
 
@@ -148,14 +148,14 @@ def train(dataset, batch_size, seed, hparams, trial_num, hpram_dir_target=''):
             tf.print("\nGen loss:", gen_loss)
             tf.print("Disc loss:", disc_loss)
 
-            if hparam_training:
-                gen_loss_metric(gen_loss)
-                disc_loss_metric(disc_loss)
+            #if hparam_training:
+            gen_loss_metric(gen_loss)
+            disc_loss_metric(disc_loss)
 
         # with train_summary_writer.as_default():
-        if hparam_training:
-            print(trial_num, "HERE!!")
-            write_hparam_metrics(train_summary_writer, hparams, trial_num, gen_loss_metric, disc_loss_metric)
+        #if hparam_training:
+        #print(trial_num, "HERE!!")
+        write_hparam_metrics(train_summary_writer, hparams, trial_num, gen_loss_metric, disc_loss_metric)
 
         # Save the model every N epochs
         # manager._checkpoint_interval
@@ -170,16 +170,16 @@ def train(dataset, batch_size, seed, hparams, trial_num, hpram_dir_target=''):
 
         print(f"Time for epoch {epoch + 1} is {time.time() - start} sec")
 
-        if hparam_training:
+        #if hparam_training:
         #  Reset metrics
-            gen_loss_metric.reset_states()
-            disc_loss_metric.reset_states()
+        gen_loss_metric.reset_states()
+        disc_loss_metric.reset_states()
 
     # Generate after the final epoch
     # display.clear_output(wait=True)
     generate_and_save_images(generator, hparams[HP_EPOCHS], seed, trial_num, now, hparam_target_dir=hparam_dir_target)
 
-    generator.save_weights(f'./weights/trial-{trial_num}-add-50k-10set.h5')
+    #generator.save_weights(f'./weights/trial-{trial_num}-add-50k-10set.h5')
 
 def write_hparam_metrics(train_summary_writer, hparams, trial_num, gen_loss_metric, disc_loss_metric):
     with train_summary_writer.as_default():
@@ -192,7 +192,7 @@ def write_hparam_metrics(train_summary_writer, hparams, trial_num, gen_loss_metr
 def write_trial_notes(trial_num, hparams, skip_descrip, hparam_target_dir):
     meta_file = f'trial_{trial_num}_meta.json'
     path = f'{envirment_utils.checkpoint_dir}{hparam_target_dir}trial-{trial_num}/'
-    target_image_dir = f'{envirment_utils.output_directory}{hparam_target_dir}trial-{trial_num}'
+    target_image_dir = f'{envirment_utils.output_directory}{hparam_target_dir}trial-{trial_num}/'
 
     if os.path.exists(path + meta_file):
         print('Trial meta found. Moving on...')
@@ -286,9 +286,9 @@ if __name__ == "__main__":
     seed = tf.random.normal([num_examples_to_generate, noise_dim])
     hparam_domains = [i.domain.values for i in selected_hparams]
     # TODO: Handle for this making sense with other trials being present and hparams is on.
-    trial_num = 627  # Set this to run a specific trial with Hparams turned off
+    trial_num = 78  # Set this to run a specific trial with Hparams turned off
     train_this = True
-    hparam_target_dir = 'DOOM-gorillaz/'
+    hparam_target_dir = 'DOOM/'
 
     if hparam_training:
         trial_num = 0
@@ -306,7 +306,7 @@ if __name__ == "__main__":
     else:
         hparams = {
             HP_EPOCHS: envirment_utils.epochs,
-            HP_NORMALIZE_DISCRIMINATOR: False,
+            HP_NORMALIZE_DISCRIMINATOR: True,
             HP_GENERATOR_OPTIMIZER: 'adam'
         }
         
